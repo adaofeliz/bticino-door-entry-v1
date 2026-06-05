@@ -1,89 +1,107 @@
 # BTicino Door Entry v1
 
-A Home Assistant custom integration for **BTicino CLASSE100X** intercoms running **v1 firmware**, the same devices that pair with the old **"Door Entry CLASSE100X"** Android app.
+[![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
+[![GitHub Release](https://img.shields.io/github/v/release/adaofeliz/bticino-door-entry-v1)](https://github.com/adaofeliz/bticino-door-entry-v1/releases/latest)
+[![GitHub Issues](https://img.shields.io/github/issues/adaofeliz/bticino-door-entry-v1)](https://github.com/adaofeliz/bticino-door-entry-v1/issues)
+[![License](https://img.shields.io/github/license/adaofeliz/bticino-door-entry-v1)](LICENSE)
+
+A Home Assistant custom integration for **BTicino CLASSE100X** intercoms running **v1 firmware** — the same devices that pair with the old **"Door Entry CLASSE100X"** Android app.
 
 > [!IMPORTANT]
-> This integration targets v1 firmware only. If your intercom uses the newer **"Home + Security"** app (Netatmo platform), this is the wrong integration. Use [`bticino_intercom`](https://github.com/k-the-hidden-hero/bticino_intercom) instead.
+> This integration targets **v1 firmware only**. If your intercom uses the newer **"Home + Security"** app (Netatmo platform), use [`bticino_intercom`](https://github.com/k-the-hidden-hero/bticino_intercom) instead.
+
+[![Add Repository](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=adaofeliz&repository=bticino-door-entry-v1&category=integration)
+[![Add Integration](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=bticino_v1)
+
+---
 
 ## What it does
 
-- Opens door locks through the Legrand Eliot cloud
-- Toggles the staircase light relay
-- Reports gateway diagnostics: firmware version, IP address, connection state
+- **Open door locks** through the Legrand Eliot cloud
+- **Toggle the staircase light** relay
+- **Gateway diagnostics** — firmware version, IP address, connection state
+
+---
 
 ## Prerequisites
 
-- Home Assistant `2024.1.0` or newer
-- A BTicino CLASSE100X intercom on **v1 firmware**
-- A working **Legrand Eliot** account (the same email and password you use with the old "Door Entry CLASSE100X" app)
-- The device must already be commissioned and online in the Eliot cloud
+> **Prerequisites:** Your intercom must already be commissioned and working with the old **"Door Entry CLASSE100X"** Android app. If you can sign into that app and open your door, you're ready.
 
-If you can sign into the old Android app and open your door from it, you're ready.
+- Home Assistant `2024.1.0` or newer
+- A BTicino CLASSE100X on **v1 firmware**
+- A **Legrand Eliot** account (same email + password as the old app)
+- `curl` available on the Home Assistant host (used for authentication)
+
+---
 
 ## Installation
 
-### Via HACS (recommended)
+### HACS (recommended)
 
-1. Open HACS in Home Assistant
-2. Go to **Integrations**
-3. Click the three dots, top right, then **Custom repositories**
-4. Add `https://github.com/adaofeliz/bticino-door-entry-v1` as an **Integration**
-5. Search for **"BTicino Door Entry v1"** and install
-6. Restart Home Assistant
+Click the **Add Repository** button above to open HACS directly, or add it manually:
+
+1. Open **HACS** in Home Assistant
+2. Go to **Integrations** → click the three-dot menu → **Custom repositories**
+3. Paste `https://github.com/adaofeliz/bticino-door-entry-v1` as an **Integration**
+4. Search for **"BTicino Door Entry v1"** and install
+5. **Restart Home Assistant**
 
 ### Manual
 
-1. Copy `custom_components/bticino_v1/` into your `<config>/custom_components/` folder
+1. Copy `custom_components/bticino_v1/` into `<config>/custom_components/`
 2. Restart Home Assistant
+
+---
 
 ## Configuration
 
-After install, go to **Settings → Devices & Services → Add Integration** and search for **BTicino Door Entry v1**.
-
-You'll be asked for:
+Click the **Add Integration** button above, or go to **Settings → Devices & Services → Add Integration** and search for **BTicino Door Entry v1**.
 
 | Field | What it is |
 |-------|------------|
-| Email | Your Legrand Eliot account email |
-| Password | Your Legrand Eliot password |
-| Home | If your account has multiple homes, pick the one you want to expose |
-| `light_as_lock` | Optional. Exposes the staircase light as a lock entity instead of a light. Handy if you want the same UI affordance as door locks. |
+| **Email** | Your Legrand Eliot account email |
+| **Password** | Your Legrand Eliot password |
+| **Home** | If you have multiple homes, pick the right one |
+| `light_as_lock` | Optional — exposes the staircase light as a lock entity |
 
-Credentials never leave Home Assistant. They're stored in the standard config entry store.
+Credentials are stored in the standard Home Assistant config entry store.
+
+---
 
 ## Entities created
 
-For each home you configure:
+| Entity | Description |
+|--------|-------------|
+| `lock.*` | One per door — momentary "unlock" with automatic relock after 5 seconds |
+| `light.*` | Staircase light relay (or a lock if `light_as_lock` is enabled) |
+| `sensor.*_firmware` | Gateway firmware version |
+| `sensor.*_ip_address` | Gateway local IP address |
+| `sensor.*_connection_state` | Gateway connection state (CONNECTED / offline) |
 
-- **Lock**, one per door, one entry per physical door the gateway knows about. Locks are momentary, they "unlock" and auto-relock after the relay pulse.
-- **Light**, one entity for the staircase light relay (or a lock, if `light_as_lock` is enabled)
-- **Sensors**, gateway diagnostics:
-  - Firmware version
-  - Local IP address
-  - Connection state (online / offline)
+---
 
 ## Known limitations
 
-- **No ring/doorbell detection in v1.0.0.** Incoming call events on v1 firmware are delivered via Firebase Cloud Messaging to the mobile app. Catching them server-side needs more work and is planned for v1.1.0.
-- **No video.** The integration doesn't tap the SIP stream.
-- **No audio.** Same reason.
-- **No two-way intercom.** You can't talk through Home Assistant.
-- Cloud polling only. Door state and gateway state refresh on a fixed interval. Door open is a direct REST call, so that part is immediate.
+- **No ring/doorbell detection in v1.0.0.** Ring events on v1 firmware are delivered via Firebase Cloud Messaging (FCM) to the mobile app. Server-side FCM reception is planned for v1.1.0.
+- **No video or audio.** The integration does not tap the SIP stream.
+- **Cloud polling only.** Module state refreshes every 5 minutes. Door open commands are immediate REST calls.
 
-If you need ring events today, keep the official app installed on a phone for notifications and use this integration for the door open and light actions.
+If you need ring notifications today, keep the official app installed on a phone for alerts and use this integration for door open and light actions.
+
+---
 
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| "Invalid auth" during setup | Wrong email or password | Sign into the old "Door Entry CLASSE100X" Android app with the same credentials to confirm they work |
-| "Cannot connect" during setup | Legrand Eliot cloud unreachable, or your network blocks it | Check `https://api.developer.legrand.com` is reachable from your HA host |
-| Setup works but no devices show up | Your account has no v1 firmware devices, or you picked the wrong home | Confirm in the old Android app that you see the device. If you have multiple homes, re-run setup and pick the right one |
-| Door entity says "Unavailable" | Gateway is offline | Check the gateway sensor for connection state. Power-cycle the intercom if it stays offline |
-| `lock.unlock` fires but the door doesn't open | Token expired, gateway lost cloud link, or relay-side fault | Look at the integration log. Tokens auto-refresh, but a stale entry can cause this. Reload the integration |
-| "Home + Security app works but this doesn't" | You're on the newer firmware/platform | This integration won't work for you. Use [`bticino_intercom`](https://github.com/k-the-hidden-hero/bticino_intercom) |
+| **"Invalid auth"** | Wrong email or password | Sign into the old "Door Entry CLASSE100X" Android app to confirm your credentials work |
+| **"Cannot connect"** | Legrand Eliot cloud unreachable, or `curl` missing from HA host | Check `https://api.developer.legrand.com` is reachable; ensure `curl` is installed |
+| **No devices show up** | Wrong home selected, or no v1 firmware devices on account | Verify in the old Android app that your device appears |
+| **Door entity "Unavailable"** | Gateway is offline | Check the gateway connection-state sensor; power-cycle the intercom |
+| **`lock.unlock` fires but door doesn't open** | Token expired or gateway lost cloud link | Reload the integration; check the integration debug log |
+| **"Home + Security app works but this doesn't"** | You're on the newer Netatmo firmware | Use [`bticino_intercom`](https://github.com/k-the-hidden-hero/bticino_intercom) instead |
 
-Enable debug logging for deeper diagnostics:
+Enable debug logging:
 
 ```yaml
 logger:
@@ -92,18 +110,24 @@ logger:
     custom_components.bticino_v1: debug
 ```
 
+---
+
 ## Roadmap
 
-- **v1.1.0**, ring event detection via Firebase Cloud Messaging. The plan is to register a FCM listener against the same project the mobile app uses, expose ring as a HA event plus a momentary binary sensor per door station.
-- Beyond that: better multi-home support, longer-running session reuse, and possibly a `button.press` entity for the door-open action so it can be wired into automations that don't want a lock.
+- **v1.1.0** — Ring event detection via Firebase Cloud Messaging (FCM listener + momentary binary sensor per door station).
+- **Future** — Better multi-home support, longer-running session reuse, `button.press` entity for door-open automations.
 
-No promises on video or audio. That's a much bigger lift and isn't on the near-term plan.
+No promises on video or audio. That's a much larger lift and isn't on the near-term plan.
+
+---
 
 ## Credits
 
-- Reverse engineering inspired by [`bticino_intercom`](https://github.com/k-the-hidden-hero/bticino_intercom) by [@k-the-hidden-hero](https://github.com/k-the-hidden-hero), even though that integration targets the newer Netatmo-based platform.
+- Reverse engineering inspired by [`bticino_intercom`](https://github.com/k-the-hidden-hero/bticino_intercom) by [@k-the-hidden-hero](https://github.com/k-the-hidden-hero), which targets the newer Netatmo platform.
 - Legrand Eliot cloud is property of Legrand. This is an unofficial, community-built integration.
+
+---
 
 ## License
 
-See [LICENSE](LICENSE) in this repository.
+MIT — see [LICENSE](LICENSE) in this repository.
