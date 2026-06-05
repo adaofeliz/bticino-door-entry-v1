@@ -55,6 +55,7 @@ class AuthHandler:
         self._expires_at: float | None = None
         self._lock = asyncio.Lock()
         self._client_session: aiohttp.ClientSession | None = None
+        self._curl_cookie_file: str | None = None
 
     def _get_session(self) -> aiohttp.ClientSession:
         if self._session is not None:
@@ -144,37 +145,53 @@ class AuthHandler:
             message = body.get("message", "")
             raise AuthError(f"invalid_credentials: status={status} {message}")
 
-    async def _selfasserted_via_curl(
+async def _selfasserted_via_curl(
         self, url: str, csrf: str, trans_id: str, policy: str,
         body: str, jar_cookies: Any,
     ) -> dict:
         tx_param = urllib.parse.quote(trans_id)
         full_url = f"{url}?tx={tx_param}&p={policy}"
         cookie_str = "; ".join(f"{k}={v.value}" for k, v in jar_cookies.items())
+
+        # Use a persistent cookie file for the entire B2C flow
+        if self._curl_cookie_file is None:
+            fd, self._curl_cookie_file = tempfile.mkstemp(suffix=".txt", prefix="bt_")
+            os.close(fd)
+            # Seed with aiohttp cookies
+            with open(self._curl_cookie_file, "w") as f:
+                f.write("# Netscape HTTP Cookie File\n")
+                for name, cookie in jar_cookies.items():
+                    domain = cookie.get("domain", ".eliotclouduamprd.b2clogin.com")
+                    secure = "TRUE" if cookie.get("secure") else "FALSE"
+                    f.write(f"{domain}\tTRUE\t/\t{secure}\t0\t{name}\t{cookie.value}\n")
+
         result = subprocess.run(
             ["curl", "-s", "-X", "POST", full_url,
              "-H", f"X-CSRF-TOKEN: {csrf}",
              "-H", "X-Requested-With: XMLHttpRequest",
              "-H", "Content-Type: application/x-www-form-urlencoded",
-             "-H", f"Cookie: {cookie_str}",
-             "-D", "-",
+             "-b", self._curl_cookie_file,
+             "-c", self._curl_cookie_file,
              "--data-raw", body],
             capture_output=True, text=True, timeout=30,
         )
-        # Parse response: headers then body, separated by \r\n\r\n
-        header_part, _, body_part = result.stdout.partition("\n\n")
-        # Also try \r\n\r\n if \n\n didn't work
-        if not body_part:
-            header_part, _, body_part = result.stdout.partition("\r\n\r\n")
-        for line in header_part.split("\r\n"):
-            if line.lower().startswith("set-cookie:"):
-                from http.cookies import SimpleCookie
-                cookie_val = line.split(":", 1)[1].strip()
-                sc = SimpleCookie()
-                sc.load(cookie_val)
-                self._get_session().cookie_jar.update_cookies(sc, URL(url))
         import json
-        return json.loads(body_part)
+        return json.loads(result.stdout)
+
+    def _curl_cookie_str(self) -> str:
+        """Build Cookie header from the persistent curl cookie file."""
+        if not self._curl_cookie_file or not os.path.exists(self._curl_cookie_file):
+            return ""
+        cookies = []
+        with open(self._curl_cookie_file) as f:
+            for line in f:
+                if line.startswith("#") or "\t" not in line:
+                    continue
+                parts = line.strip().split("\t")
+                if len(parts) >= 7:
+                    name = parts[5].lstrip("#HttpOnly_")
+                    cookies.append(f"{name}={parts[6]}")
+        return "; ".join(cookies)
 
     async def _get_auth_code(
         self, csrf: str, trans_id: str, tenant: str
@@ -189,7 +206,7 @@ class AuthHandler:
             location = resp.headers.get("Location", "")
 
         if not location:
-            location = self._get_auth_code_via_curl(url, csrf, trans_id, B2C_POLICY, jar_cookies)
+            location = self._get_auth_code_via_curl(url, csrf, trans_id, B2C_POLICY)
 
         code_match = re.search(r"[?&]code=([^&]+)", location)
         if not code_match:
@@ -198,11 +215,12 @@ class AuthHandler:
 
     def _get_auth_code_via_curl(
         self, url: str, csrf: str, trans_id: str, policy: str,
-        jar_cookies: Any,
     ) -> str:
         csrf_enc = urllib.parse.quote(csrf)
         tx_enc = urllib.parse.quote(trans_id)
         full_url = f"{url}?csrf_token={csrf_enc}&tx={tx_enc}&p={policy}"
+        session = self._get_session()
+        jar_cookies = session.cookie_jar.filter_cookies(URL(url))
         cookie_str = "; ".join(f"{k}={v.value}" for k, v in jar_cookies.items())
         result = subprocess.run(
             ["curl", "-sv", "-o", "/dev/null", "--max-redirs", "0", full_url,
