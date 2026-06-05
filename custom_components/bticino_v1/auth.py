@@ -145,7 +145,7 @@ class AuthHandler:
             message = body.get("message", "")
             raise AuthError(f"invalid_credentials: status={status} {message}")
 
-async def _selfasserted_via_curl(
+    async def _selfasserted_via_curl(
         self, url: str, csrf: str, trans_id: str, policy: str,
         body: str, jar_cookies: Any,
     ) -> dict:
@@ -205,7 +205,7 @@ async def _selfasserted_via_curl(
         ) as resp:
             location = resp.headers.get("Location", "")
 
-        if not location:
+        if not location or "error=" in location:
             location = self._get_auth_code_via_curl(url, csrf, trans_id, B2C_POLICY)
 
         code_match = re.search(r"[?&]code=([^&]+)", location)
@@ -219,14 +219,10 @@ async def _selfasserted_via_curl(
         csrf_enc = urllib.parse.quote(csrf)
         tx_enc = urllib.parse.quote(trans_id)
         full_url = f"{url}?csrf_token={csrf_enc}&tx={tx_enc}&p={policy}"
-        session = self._get_session()
-        jar_cookies = session.cookie_jar.filter_cookies(URL(url))
-        cookie_str = "; ".join(f"{k}={v.value}" for k, v in jar_cookies.items())
-        result = subprocess.run(
-            ["curl", "-sv", "-o", "/dev/null", "--max-redirs", "0", full_url,
-             "-H", f"Cookie: {cookie_str}"],
-            capture_output=True, text=True, timeout=30,
-        )
+        cmd = ["curl", "-sv", "-o", "/dev/null", "--max-redirs", "0", full_url]
+        if self._curl_cookie_file:
+            cmd.extend(["-b", self._curl_cookie_file, "-c", self._curl_cookie_file])
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         for line in result.stderr.split("\n"):
             if "Location:" in line:
                 return line.split("Location:", 1)[1].strip()
