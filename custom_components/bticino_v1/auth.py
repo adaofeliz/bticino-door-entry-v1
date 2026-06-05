@@ -97,7 +97,8 @@ class AuthHandler:
             "code_challenge_method": "S256",
         })
         full_url = f"{url}?{params}"
-        result = subprocess.run(
+        result = await asyncio.to_thread(
+            subprocess.run,
             ["curl", "-s", "-L",
              "-b", self._curl_cookie_file or "",
              "-c", self._curl_cookie_file or "",
@@ -160,7 +161,8 @@ class AuthHandler:
     ) -> dict:
         tx_param = urllib.parse.quote(trans_id)
         full_url = f"{url}?tx={tx_param}&p={policy}"
-        result = subprocess.run(
+        result = await asyncio.to_thread(
+            subprocess.run,
             ["curl", "-s", "-X", "POST", full_url,
              "-H", f"X-CSRF-TOKEN: {csrf}",
              "-H", "X-Requested-With: XMLHttpRequest",
@@ -187,14 +189,14 @@ class AuthHandler:
             location = resp.headers.get("Location", "")
 
         if not location or "error=" in location:
-            location = self._get_auth_code_via_curl(url, csrf, trans_id, B2C_POLICY)
+            location = await self._get_auth_code_via_curl(url, csrf, trans_id, B2C_POLICY)
 
         code_match = re.search(r"[?&]code=([^&]+)", location)
         if not code_match:
             raise AuthError(f"auth_code_not_found in Location: {location!r}")
         return code_match.group(1)
 
-    def _get_auth_code_via_curl(
+    async def _get_auth_code_via_curl(
         self, url: str, csrf: str, trans_id: str, policy: str,
     ) -> str:
         csrf_enc = urllib.parse.quote(csrf)
@@ -203,7 +205,9 @@ class AuthHandler:
         cmd = ["curl", "-sv", "-o", "/dev/null", "--max-redirs", "0", full_url]
         if self._curl_cookie_file:
             cmd.extend(["-b", self._curl_cookie_file, "-c", self._curl_cookie_file])
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = await asyncio.to_thread(
+            subprocess.run, cmd, capture_output=True, text=True, timeout=30,
+        )
         for line in result.stderr.split("\n"):
             if "Location:" in line:
                 return line.split("Location:", 1)[1].strip()
