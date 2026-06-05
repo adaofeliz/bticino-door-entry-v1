@@ -1,4 +1,5 @@
 """BTicino Door Entry v1 — Home Assistant integration."""
+
 from __future__ import annotations
 
 import logging
@@ -10,10 +11,14 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers.storage import Store
 
 from .api import LegrandApiClientV1
-from .auth import AuthHandler, AuthError
+from .auth import AuthError, AuthHandler
 from .const import (
-    DOMAIN, PLATFORMS, TOKEN_STORAGE_VERSION,
-    COORDINATOR_KEY, AUTH_KEY, API_KEY,
+    API_KEY,
+    AUTH_KEY,
+    COORDINATOR_KEY,
+    DOMAIN,
+    PLATFORMS,
+    TOKEN_STORAGE_VERSION,
 )
 from .coordinator import BticinoV1Coordinator
 

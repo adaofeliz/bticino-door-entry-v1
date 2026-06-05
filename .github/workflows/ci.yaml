@@ -64,7 +64,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-homeassistant-custom-component freezegun
+          pip install pytest pytest-asyncio pytest-homeassistant-custom-component freezegun aioresponses
           pip install aiohttp
 
       - name: Run tests

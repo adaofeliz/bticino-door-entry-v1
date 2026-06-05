@@ -1,5 +1,6 @@
 # pyright: reportMissingImports=false, reportUnknownVariableType=false, reportUnknownMemberType=false, reportUnknownParameterType=false, reportUnknownArgumentType=false, reportUntypedBaseClass=false, reportUnannotatedClassAttribute=false, reportUnusedImport=false
 """Sensor platform for BTicino Door Entry v1 — gateway diagnostics."""
+
 from __future__ import annotations
 
 import logging
@@ -10,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, COORDINATOR_KEY
+from .const import COORDINATOR_KEY, DOMAIN
 from .coordinator import BticinoV1Coordinator
 from .entity import BticinoV1Entity
 
@@ -29,11 +30,13 @@ async def async_setup_entry(
     gateway_data = coordinator.data.get("modules", {}).get(gateway_id)
     if not gateway_data:
         return
-    async_add_entities([
-        BticinoV1FirmwareSensor(coordinator, entry, gateway_id),
-        BticinoV1IpSensor(coordinator, entry, gateway_id),
-        BticinoV1ConnectionSensor(coordinator, entry, gateway_id),
-    ])
+    async_add_entities(
+        [
+            BticinoV1FirmwareSensor(coordinator, entry, gateway_id),
+            BticinoV1IpSensor(coordinator, entry, gateway_id),
+            BticinoV1ConnectionSensor(coordinator, entry, gateway_id),
+        ]
+    )
 
 
 class _GatewaySensor(BticinoV1Entity, SensorEntity):

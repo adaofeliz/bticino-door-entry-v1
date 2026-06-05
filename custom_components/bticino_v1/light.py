@@ -1,4 +1,5 @@
 """Light platform for BTicino Door Entry v1."""
+
 # pyright: reportMissingImports=false, reportExplicitAny=false
 from __future__ import annotations
 
@@ -9,10 +10,10 @@ from homeassistant.components.light import LightEntity
 from homeassistant.components.lock import LockEntity, LockEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_call_later
 
-from .const import DOMAIN, COORDINATOR_KEY, DEVICE_TYPE_LIGHT, LOCK_RELOCK_DELAY
+from .const import COORDINATOR_KEY, DEVICE_TYPE_LIGHT, DOMAIN, LOCK_RELOCK_DELAY
 from .coordinator import BticinoV1Coordinator
 from .entity import BticinoV1Entity
 

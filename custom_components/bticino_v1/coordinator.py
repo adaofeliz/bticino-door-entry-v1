@@ -9,15 +9,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import LegrandApiClientV1, ApiError
-from .auth import AuthHandler, AuthError
-from .const import DOMAIN, UPDATE_INTERVAL, DEVICE_TYPE_GATEWAY
+from .api import ApiError, LegrandApiClientV1
+from .auth import AuthError, AuthHandler
+from .const import DEVICE_TYPE_GATEWAY, DOMAIN, UPDATE_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class BticinoV1Coordinator(DataUpdateCoordinator[dict[str, Any]]):
-
     def __init__(
         self,
         hass: HomeAssistant,

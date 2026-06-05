@@ -6,7 +6,7 @@ from typing import Any
 
 import aiohttp
 
-from .auth import AuthHandler, AuthError
+from .auth import AuthHandler
 from .const import API_BASE, APIM_SUBSCRIPTION_KEY
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ class LegrandApiClientV1:
                     continue
                 if resp.status >= 500:
                     if attempt < _MAX_RETRIES:
-                        await asyncio.sleep(_RETRY_DELAY * (2 ** attempt))
+                        await asyncio.sleep(_RETRY_DELAY * (2**attempt))
                         continue
                     body = await resp.json(content_type=None)
                     raise ApiError(resp.status, body)
@@ -81,7 +81,7 @@ class LegrandApiClientV1:
                     continue
                 if resp.status >= 500:
                     if attempt < _MAX_RETRIES:
-                        await asyncio.sleep(_RETRY_DELAY * (2 ** attempt))
+                        await asyncio.sleep(_RETRY_DELAY * (2**attempt))
                         continue
                     body = await resp.json(content_type=None)
                     raise ApiError(resp.status, body)

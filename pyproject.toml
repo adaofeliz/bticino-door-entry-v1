@@ -34,7 +34,7 @@ asyncio_mode = "auto"
 
 [tool.bandit]
 exclude_dirs = ["tests"]
-skips = ["B101"]  # assert is fine in HA integrations
+skips = ["B101", "B404"]  # assert is fine in HA integrations; subprocess used for curl auth
 
 [tool.coverage.run]
 source = ["custom_components/bticino_v1"]

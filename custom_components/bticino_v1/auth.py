@@ -11,18 +11,19 @@ import subprocess
 import tempfile
 import time
 import urllib.parse
-from typing import Any, Callable, Awaitable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 import aiohttp
 from yarl import URL
 
 from .const import (
     B2C_BASE,
-    B2C_TENANT,
-    B2C_POLICY,
     B2C_CLIENT_ID,
-    B2C_SCOPE,
+    B2C_POLICY,
     B2C_REDIRECT_URI,
+    B2C_SCOPE,
+    B2C_TENANT,
     B2C_USER_AGENT,
 )
 
@@ -69,11 +70,7 @@ class AuthHandler:
 
     async def authenticate(self) -> None:
         verifier = secrets.token_urlsafe(32)
-        challenge = (
-            base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
-            .rstrip(b"=")
-            .decode()
-        )
+        challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
         # Create a shared cookie file for the B2C curl session
         fd, self._curl_cookie_file = tempfile.mkstemp(suffix=".txt", prefix="bt_")
         os.close(fd)
@@ -82,28 +79,27 @@ class AuthHandler:
         code = await self._get_auth_code(csrf, trans_id, tenant)
         await self._exchange_code(code, verifier)
 
-    async def _scrape_authorize(
-        self, verifier: str, challenge: str
-    ) -> tuple[str, str, str]:
+    async def _scrape_authorize(self, verifier: str, challenge: str) -> tuple[str, str, str]:
         url = f"{B2C_BASE}/{B2C_TENANT}/oauth2/v2.0/authorize"
-        params = urllib.parse.urlencode({
-            "p": B2C_POLICY,
-            "client_id": B2C_CLIENT_ID,
-            "response_type": "code",
-            "redirect_uri": B2C_REDIRECT_URI,
-            "response_mode": "query",
-            "scope": B2C_SCOPE,
-            "code_challenge": challenge,
-            "code_challenge_method": "S256",
-        })
+        params = urllib.parse.urlencode(
+            {
+                "p": B2C_POLICY,
+                "client_id": B2C_CLIENT_ID,
+                "response_type": "code",
+                "redirect_uri": B2C_REDIRECT_URI,
+                "response_mode": "query",
+                "scope": B2C_SCOPE,
+                "code_challenge": challenge,
+                "code_challenge_method": "S256",
+            }
+        )
         full_url = f"{url}?{params}"
         result = await asyncio.to_thread(
             subprocess.run,
-            ["curl", "-s", "-L",
-             "-b", self._curl_cookie_file or "",
-             "-c", self._curl_cookie_file or "",
-             full_url],
-            capture_output=True, text=True, timeout=30,
+            ["curl", "-s", "-L", "-b", self._curl_cookie_file or "", "-c", self._curl_cookie_file or "", full_url],
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         html = result.stdout
 
@@ -124,9 +120,7 @@ class AuthHandler:
 
         return csrf, trans_id, tenant
 
-    async def _post_selfasserted(
-        self, csrf: str, trans_id: str, tenant: str
-    ) -> None:
+    async def _post_selfasserted(self, csrf: str, trans_id: str, tenant: str) -> None:
         url = f"{B2C_BASE}{tenant}/SelfAsserted"
         params = {"tx": trans_id, "p": B2C_POLICY}
         headers = {
@@ -141,14 +135,10 @@ class AuthHandler:
         session = self._get_session()
         jar_cookies = session.cookie_jar.filter_cookies(URL(url))
         try:
-            async with session.post(
-                url, params=params, headers=headers, data=data, cookies=jar_cookies
-            ) as resp:
+            async with session.post(url, params=params, headers=headers, data=data, cookies=jar_cookies) as resp:
                 body = await resp.json(content_type=None)
         except Exception:
-            body = await self._selfasserted_via_curl(
-                url, csrf, trans_id, B2C_POLICY, data, jar_cookies
-            )
+            body = await self._selfasserted_via_curl(url, csrf, trans_id, B2C_POLICY, data, jar_cookies)
 
         status = str(body.get("status", ""))
         if status != "200":
@@ -156,36 +146,51 @@ class AuthHandler:
             raise AuthError(f"invalid_credentials: status={status} {message}")
 
     async def _selfasserted_via_curl(
-        self, url: str, csrf: str, trans_id: str, policy: str,
-        body: str, jar_cookies: Any,
+        self,
+        url: str,
+        csrf: str,
+        trans_id: str,
+        policy: str,
+        body: str,
+        jar_cookies: Any,
     ) -> dict:
         tx_param = urllib.parse.quote(trans_id)
         full_url = f"{url}?tx={tx_param}&p={policy}"
         result = await asyncio.to_thread(
             subprocess.run,
-            ["curl", "-s", "-X", "POST", full_url,
-             "-H", f"X-CSRF-TOKEN: {csrf}",
-             "-H", "X-Requested-With: XMLHttpRequest",
-             "-H", "Content-Type: application/x-www-form-urlencoded",
-             "-b", self._curl_cookie_file or "",
-             "-c", self._curl_cookie_file or "",
-             "--data-raw", body],
-            capture_output=True, text=True, timeout=30,
+            [
+                "curl",
+                "-s",
+                "-X",
+                "POST",
+                full_url,
+                "-H",
+                f"X-CSRF-TOKEN: {csrf}",
+                "-H",
+                "X-Requested-With: XMLHttpRequest",
+                "-H",
+                "Content-Type: application/x-www-form-urlencoded",
+                "-b",
+                self._curl_cookie_file or "",
+                "-c",
+                self._curl_cookie_file or "",
+                "--data-raw",
+                body,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         import json
+
         return json.loads(result.stdout)
 
-
-    async def _get_auth_code(
-        self, csrf: str, trans_id: str, tenant: str
-    ) -> str:
+    async def _get_auth_code(self, csrf: str, trans_id: str, tenant: str) -> str:
         url = f"{B2C_BASE}{tenant}/api/CombinedSigninAndSignup/confirmed"
         params = {"csrf_token": csrf, "tx": trans_id, "p": B2C_POLICY}
         session = self._get_session()
         jar_cookies = session.cookie_jar.filter_cookies(URL(url))
-        async with session.get(
-            url, params=params, allow_redirects=False, cookies=jar_cookies
-        ) as resp:
+        async with session.get(url, params=params, allow_redirects=False, cookies=jar_cookies) as resp:
             location = resp.headers.get("Location", "")
 
         if not location or "error=" in location:
@@ -197,7 +202,11 @@ class AuthHandler:
         return code_match.group(1)
 
     async def _get_auth_code_via_curl(
-        self, url: str, csrf: str, trans_id: str, policy: str,
+        self,
+        url: str,
+        csrf: str,
+        trans_id: str,
+        policy: str,
     ) -> str:
         csrf_enc = urllib.parse.quote(csrf)
         tx_enc = urllib.parse.quote(trans_id)
@@ -206,7 +215,11 @@ class AuthHandler:
         if self._curl_cookie_file:
             cmd.extend(["-b", self._curl_cookie_file, "-c", self._curl_cookie_file])
         result = await asyncio.to_thread(
-            subprocess.run, cmd, capture_output=True, text=True, timeout=30,
+            subprocess.run,
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         for line in result.stderr.split("\n"):
             if "Location:" in line:
@@ -302,10 +315,10 @@ class AuthHandler:
         return self._access_token  # type: ignore[return-value]
 
     async def close(self) -> None:
+        import contextlib
+
         if self._curl_cookie_file:
-            try:
+            with contextlib.suppress(OSError):
                 os.unlink(self._curl_cookie_file)
-            except OSError:
-                pass
         if self._owns_session and self._client_session and not self._client_session.closed:
             await self._client_session.close()

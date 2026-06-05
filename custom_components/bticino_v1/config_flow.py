@@ -35,7 +35,6 @@ _STEP_OPTIONS_SCHEMA = vol.Schema(
 
 
 class BticinoV1ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-
     VERSION = 1
 
     def __init__(self) -> None:
@@ -44,9 +43,7 @@ class BticinoV1ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._plants: list[dict] = []
         self._home_id: str | None = None
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.FlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> config_entries.FlowResult:
         if user_input is None:
             return self.async_show_form(step_id="user", data_schema=_STEP_USER_SCHEMA)
 
@@ -103,9 +100,7 @@ class BticinoV1ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return await self.async_step_select_home()
 
-    async def async_step_select_home(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.FlowResult:
+    async def async_step_select_home(self, user_input: dict[str, Any] | None = None) -> config_entries.FlowResult:
         if user_input is not None:
             self._home_id = user_input["home_id"]
             return await self.async_step_init_options()
@@ -114,13 +109,9 @@ class BticinoV1ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema = vol.Schema({vol.Required("home_id"): vol.In(plant_options)})
         return self.async_show_form(step_id="select_home", data_schema=schema)
 
-    async def async_step_init_options(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.FlowResult:
+    async def async_step_init_options(self, user_input: dict[str, Any] | None = None) -> config_entries.FlowResult:
         if user_input is None:
-            return self.async_show_form(
-                step_id="init_options", data_schema=_STEP_OPTIONS_SCHEMA
-            )
+            return self.async_show_form(step_id="init_options", data_schema=_STEP_OPTIONS_SCHEMA)
 
         light_as_lock = user_input.get("light_as_lock", False)
 
@@ -153,18 +144,12 @@ class BticinoV1ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             options={"light_as_lock": light_as_lock},
         )
 
-    async def async_step_reauth(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.FlowResult:
+    async def async_step_reauth(self, user_input: dict[str, Any] | None = None) -> config_entries.FlowResult:
         return await self.async_step_reauth_confirm()
 
-    async def async_step_reauth_confirm(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.FlowResult:
+    async def async_step_reauth_confirm(self, user_input: dict[str, Any] | None = None) -> config_entries.FlowResult:
         if user_input is None:
-            return self.async_show_form(
-                step_id="reauth_confirm", data_schema=_STEP_REAUTH_SCHEMA
-            )
+            return self.async_show_form(step_id="reauth_confirm", data_schema=_STEP_REAUTH_SCHEMA)
 
         entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
         username = entry.data[CONF_USERNAME]
@@ -191,9 +176,7 @@ class BticinoV1ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         await auth.close()
 
-        self.hass.config_entries.async_update_entry(
-            entry, data={**entry.data, CONF_PASSWORD: new_password}
-        )
+        self.hass.config_entries.async_update_entry(entry, data={**entry.data, CONF_PASSWORD: new_password})
         return self.async_abort(reason="reauth_successful")
 
     @staticmethod
@@ -205,15 +188,10 @@ class BticinoV1ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class BticinoV1OptionsFlowHandler(config_entries.OptionsFlow):
-
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> config_entries.FlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> config_entries.FlowResult:
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
         current = self.config_entry.options.get("light_as_lock", False)
-        schema = vol.Schema(
-            {vol.Required("light_as_lock", default=current): BooleanSelector()}
-        )
+        schema = vol.Schema({vol.Required("light_as_lock", default=current): BooleanSelector()})
         return self.async_show_form(step_id="init", data_schema=schema)
