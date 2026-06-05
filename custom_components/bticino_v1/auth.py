@@ -57,7 +57,8 @@ class AuthHandler:
             return self._session
         if self._client_session is None or self._client_session.closed:
             self._client_session = aiohttp.ClientSession(
-                headers={"User-Agent": B2C_USER_AGENT}
+                headers={"User-Agent": B2C_USER_AGENT},
+                cookie_jar=aiohttp.CookieJar(unsafe=True),
             )
         return self._client_session
 
@@ -123,7 +124,14 @@ class AuthHandler:
         async with session.post(
             url, params=params, headers=headers, data=data
         ) as resp:
-            body = await resp.json(content_type=None)
+            try:
+                body = await resp.json(content_type=None)
+            except Exception:
+                raw_text = await resp.text()
+                raise AuthError(
+                    f"SelfAsserted returned non-JSON response (HTTP {resp.status})",
+                    last_html=raw_text,
+                )
 
         status = str(body.get("status", ""))
         if status != "200":
