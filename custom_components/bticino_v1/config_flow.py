@@ -63,6 +63,14 @@ class BticinoV1ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data_schema=_STEP_USER_SCHEMA,
                 errors={"base": "invalid_auth"},
             )
+        except Exception as exc:
+            _LOGGER.exception("Unexpected error during authentication: %s", exc)
+            await auth.close()
+            return self.async_show_form(
+                step_id="user",
+                data_schema=_STEP_USER_SCHEMA,
+                errors={"base": "cannot_connect"},
+            )
 
         api = LegrandApiClientV1(auth)
         try:
@@ -171,6 +179,14 @@ class BticinoV1ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="reauth_confirm",
                 data_schema=_STEP_REAUTH_SCHEMA,
                 errors={"base": "invalid_auth"},
+            )
+        except Exception as exc:
+            _LOGGER.exception("Unexpected error during reauth: %s", exc)
+            await auth.close()
+            return self.async_show_form(
+                step_id="reauth_confirm",
+                data_schema=_STEP_REAUTH_SCHEMA,
+                errors={"base": "cannot_connect"},
             )
 
         await auth.close()
