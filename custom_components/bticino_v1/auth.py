@@ -4,13 +4,17 @@ import asyncio
 import base64
 import hashlib
 import logging
+import os
 import re
 import secrets
+import subprocess
+import tempfile
 import time
 import urllib.parse
 from typing import Any, Callable, Awaitable
 
 import aiohttp
+from yarl import URL
 
 from .const import (
     B2C_BASE,
@@ -114,29 +118,63 @@ class AuthHandler:
     ) -> None:
         url = f"{B2C_BASE}{tenant}/SelfAsserted"
         params = {"tx": trans_id, "p": B2C_POLICY}
-        headers = {"X-CSRF-TOKEN": csrf}
+        headers = {
+            "X-CSRF-TOKEN": csrf,
+            "X-Requested-With": "XMLHttpRequest",
+        }
         data = (
             f"request_type=RESPONSE"
             f"&logonIdentifier={urllib.parse.quote(self._username, safe='')}"
             f"&password={urllib.parse.quote(self._password, safe='')}"
         )
         session = self._get_session()
-        async with session.post(
-            url, params=params, headers=headers, data=data
-        ) as resp:
-            try:
+        jar_cookies = session.cookie_jar.filter_cookies(URL(url))
+        try:
+            async with session.post(
+                url, params=params, headers=headers, data=data, cookies=jar_cookies
+            ) as resp:
                 body = await resp.json(content_type=None)
-            except Exception:
-                raw_text = await resp.text()
-                raise AuthError(
-                    f"SelfAsserted returned non-JSON response (HTTP {resp.status})",
-                    last_html=raw_text,
-                )
+        except Exception:
+            body = await self._selfasserted_via_curl(
+                url, csrf, trans_id, B2C_POLICY, data, jar_cookies
+            )
 
         status = str(body.get("status", ""))
         if status != "200":
             message = body.get("message", "")
             raise AuthError(f"invalid_credentials: status={status} {message}")
+
+    async def _selfasserted_via_curl(
+        self, url: str, csrf: str, trans_id: str, policy: str,
+        body: str, jar_cookies: Any,
+    ) -> dict:
+        tx_param = urllib.parse.quote(trans_id)
+        full_url = f"{url}?tx={tx_param}&p={policy}"
+        cookie_str = "; ".join(f"{k}={v.value}" for k, v in jar_cookies.items())
+        result = subprocess.run(
+            ["curl", "-s", "-X", "POST", full_url,
+             "-H", f"X-CSRF-TOKEN: {csrf}",
+             "-H", "X-Requested-With: XMLHttpRequest",
+             "-H", "Content-Type: application/x-www-form-urlencoded",
+             "-H", f"Cookie: {cookie_str}",
+             "-D", "-",
+             "--data-raw", body],
+            capture_output=True, text=True, timeout=30,
+        )
+        # Parse response: headers then body, separated by \r\n\r\n
+        header_part, _, body_part = result.stdout.partition("\n\n")
+        # Also try \r\n\r\n if \n\n didn't work
+        if not body_part:
+            header_part, _, body_part = result.stdout.partition("\r\n\r\n")
+        for line in header_part.split("\r\n"):
+            if line.lower().startswith("set-cookie:"):
+                from http.cookies import SimpleCookie
+                cookie_val = line.split(":", 1)[1].strip()
+                sc = SimpleCookie()
+                sc.load(cookie_val)
+                self._get_session().cookie_jar.update_cookies(sc, URL(url))
+        import json
+        return json.loads(body_part)
 
     async def _get_auth_code(
         self, csrf: str, trans_id: str, tenant: str
@@ -144,15 +182,37 @@ class AuthHandler:
         url = f"{B2C_BASE}{tenant}/api/CombinedSigninAndSignup/confirmed"
         params = {"csrf_token": csrf, "tx": trans_id, "p": B2C_POLICY}
         session = self._get_session()
+        jar_cookies = session.cookie_jar.filter_cookies(URL(url))
         async with session.get(
-            url, params=params, allow_redirects=False
+            url, params=params, allow_redirects=False, cookies=jar_cookies
         ) as resp:
             location = resp.headers.get("Location", "")
+
+        if not location:
+            location = self._get_auth_code_via_curl(url, csrf, trans_id, B2C_POLICY, jar_cookies)
 
         code_match = re.search(r"[?&]code=([^&]+)", location)
         if not code_match:
             raise AuthError(f"auth_code_not_found in Location: {location!r}")
         return code_match.group(1)
+
+    def _get_auth_code_via_curl(
+        self, url: str, csrf: str, trans_id: str, policy: str,
+        jar_cookies: Any,
+    ) -> str:
+        csrf_enc = urllib.parse.quote(csrf)
+        tx_enc = urllib.parse.quote(trans_id)
+        full_url = f"{url}?csrf_token={csrf_enc}&tx={tx_enc}&p={policy}"
+        cookie_str = "; ".join(f"{k}={v.value}" for k, v in jar_cookies.items())
+        result = subprocess.run(
+            ["curl", "-sv", "-o", "/dev/null", "--max-redirs", "0", full_url,
+             "-H", f"Cookie: {cookie_str}"],
+            capture_output=True, text=True, timeout=30,
+        )
+        for line in result.stderr.split("\n"):
+            if "Location:" in line:
+                return line.split("Location:", 1)[1].strip()
+        return ""
 
     async def _exchange_code(self, code: str, verifier: str) -> None:
         url = f"{B2C_BASE}/{B2C_TENANT}/oauth2/v2.0/token"
