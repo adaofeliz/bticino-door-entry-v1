@@ -74,6 +74,9 @@ class AuthHandler:
             .rstrip(b"=")
             .decode()
         )
+        # Create a shared cookie file for the B2C curl session
+        fd, self._curl_cookie_file = tempfile.mkstemp(suffix=".txt", prefix="bt_")
+        os.close(fd)
         csrf, trans_id, tenant = await self._scrape_authorize(verifier, challenge)
         await self._post_selfasserted(csrf, trans_id, tenant)
         code = await self._get_auth_code(csrf, trans_id, tenant)
@@ -83,7 +86,7 @@ class AuthHandler:
         self, verifier: str, challenge: str
     ) -> tuple[str, str, str]:
         url = f"{B2C_BASE}/{B2C_TENANT}/oauth2/v2.0/authorize"
-        params = {
+        params = urllib.parse.urlencode({
             "p": B2C_POLICY,
             "client_id": B2C_CLIENT_ID,
             "response_type": "code",
@@ -92,10 +95,16 @@ class AuthHandler:
             "scope": B2C_SCOPE,
             "code_challenge": challenge,
             "code_challenge_method": "S256",
-        }
-        session = self._get_session()
-        async with session.get(url, params=params, allow_redirects=True) as resp:
-            html = await resp.text()
+        })
+        full_url = f"{url}?{params}"
+        result = subprocess.run(
+            ["curl", "-s", "-L",
+             "-b", self._curl_cookie_file or "",
+             "-c", self._curl_cookie_file or "",
+             full_url],
+            capture_output=True, text=True, timeout=30,
+        )
+        html = result.stdout
 
         csrf_match = re.search(r'"csrf":"([^"]+)"', html)
         if not csrf_match:
@@ -151,47 +160,19 @@ class AuthHandler:
     ) -> dict:
         tx_param = urllib.parse.quote(trans_id)
         full_url = f"{url}?tx={tx_param}&p={policy}"
-        cookie_str = "; ".join(f"{k}={v.value}" for k, v in jar_cookies.items())
-
-        # Use a persistent cookie file for the entire B2C flow
-        if self._curl_cookie_file is None:
-            fd, self._curl_cookie_file = tempfile.mkstemp(suffix=".txt", prefix="bt_")
-            os.close(fd)
-            # Seed with aiohttp cookies
-            with open(self._curl_cookie_file, "w") as f:
-                f.write("# Netscape HTTP Cookie File\n")
-                for name, cookie in jar_cookies.items():
-                    domain = cookie.get("domain", ".eliotclouduamprd.b2clogin.com")
-                    secure = "TRUE" if cookie.get("secure") else "FALSE"
-                    f.write(f"{domain}\tTRUE\t/\t{secure}\t0\t{name}\t{cookie.value}\n")
-
         result = subprocess.run(
             ["curl", "-s", "-X", "POST", full_url,
              "-H", f"X-CSRF-TOKEN: {csrf}",
              "-H", "X-Requested-With: XMLHttpRequest",
              "-H", "Content-Type: application/x-www-form-urlencoded",
-             "-b", self._curl_cookie_file,
-             "-c", self._curl_cookie_file,
+             "-b", self._curl_cookie_file or "",
+             "-c", self._curl_cookie_file or "",
              "--data-raw", body],
             capture_output=True, text=True, timeout=30,
         )
         import json
         return json.loads(result.stdout)
 
-    def _curl_cookie_str(self) -> str:
-        """Build Cookie header from the persistent curl cookie file."""
-        if not self._curl_cookie_file or not os.path.exists(self._curl_cookie_file):
-            return ""
-        cookies = []
-        with open(self._curl_cookie_file) as f:
-            for line in f:
-                if line.startswith("#") or "\t" not in line:
-                    continue
-                parts = line.strip().split("\t")
-                if len(parts) >= 7:
-                    name = parts[5].lstrip("#HttpOnly_")
-                    cookies.append(f"{name}={parts[6]}")
-        return "; ".join(cookies)
 
     async def _get_auth_code(
         self, csrf: str, trans_id: str, tenant: str
@@ -317,5 +298,10 @@ class AuthHandler:
         return self._access_token  # type: ignore[return-value]
 
     async def close(self) -> None:
+        if self._curl_cookie_file:
+            try:
+                os.unlink(self._curl_cookie_file)
+            except OSError:
+                pass
         if self._owns_session and self._client_session and not self._client_session.closed:
             await self._client_session.close()

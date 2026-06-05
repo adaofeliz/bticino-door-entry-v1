@@ -151,8 +151,8 @@ async def test_authenticate_missing_csrf_raises_auth_error_with_last_html():
     """HTML without csrf field must raise AuthError with last_html attribute."""
     handler = AuthHandler("user@example.com", "pass")
 
-    with aioresponses() as m:
-        m.get(re.compile(r".*authorize.*"), status=200, body=FIXTURE_HTML_NO_CSRF)
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(stdout=FIXTURE_HTML_NO_CSRF, returncode=0)
 
         with pytest.raises(AuthError) as exc_info:
             await handler.authenticate()
