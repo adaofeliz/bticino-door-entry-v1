@@ -1,0 +1,52 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: "home-assistant/actions/hassfest@master"
+        name: HassFest
+
+      - name: HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          # Mark as prerelease if tag contains -dev, -alpha, -beta, -rc
+          if [[ "$VERSION" == *-dev* ]] || [[ "$VERSION" == *-alpha* ]] || [[ "$VERSION" == *-beta* ]] || [[ "$VERSION" == *-rc* ]]; then
+            echo "PRERELEASE=true" >> $GITHUB_ENV
+          else
+            echo "PRERELEASE=false" >> $GITHUB_ENV
+          fi
+
+      - name: Package integration into zip
+        run: |
+          cd ${{ github.workspace }}/custom_components/bticino_v1
+          zip -r ${{ github.workspace }}/bticino_v1-${{ env.VERSION }}.zip . -x ".*" -x "__pycache__/*"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ env.VERSION }}
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ env.PRERELEASE == 'true' }}
+          files: |
+            ${{ github.workspace }}/bticino_v1-${{ env.VERSION }}.zip
