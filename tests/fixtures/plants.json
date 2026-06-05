@@ -1,0 +1,57 @@
+[
+  {
+    "name": "Test Home",
+    "ownerEmail": "fixture@example.com",
+    "status": "active",
+    "type": "house",
+    "offset": "\u00b100:00",
+    "activationDate": "2025-08-24T10:55:16",
+    "id": "af5422eb-a818-441d-8d11-a419089f5a00",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "country": "pt",
+    "files": []
+  },
+  {
+    "name": "Test Home",
+    "ownerEmail": "fixture@example.com",
+    "status": "active",
+    "type": "house",
+    "offset": "\u00b100:00",
+    "activationDate": "2021-11-12T21:24:21",
+    "id": "27f79804-998a-40e4-9cf4-c6920b0eff45",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "invitedUsers": [],
+    "country": "pt",
+    "files": []
+  },
+  {
+    "name": "Test Home",
+    "ownerEmail": "fixture@example.com",
+    "status": "active",
+    "type": "house",
+    "offset": "\u00b100:00",
+    "activationDate": "2025-08-08T12:31:23",
+    "id": "d65563b4-fb91-4db9-b4a1-514e3119058a",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "country": "pt",
+    "files": []
+  }
+]

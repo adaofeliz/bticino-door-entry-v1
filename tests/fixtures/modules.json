@@ -1,0 +1,301 @@
+[
+  {
+    "device": "gateway",
+    "status": "on",
+    "tags": [
+      {
+        "key": "commissioned",
+        "value": "true"
+      }
+    ],
+    "lastSeen": "0001-01-01T00:00:00",
+    "deviceModel": "bs-classe100x",
+    "connectionStateDate": "2026-06-04T19:43:47",
+    "connectionState": "CONNECTED",
+    "lastRegistrationDate": "2025-08-24T10:55:26",
+    "id": "fa60f138-b785-4dec-b7e4-53f91abf6fa9",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "invitedUsers": [],
+    "metrics": [],
+    "plantId": "af5422eb-a818-441d-8d11-a419089f5a00",
+    "firmwareVersion": "1.5.8",
+    "hardwareVersion": "02.06.0",
+    "serialNumber": "00:03:50:86:57:ec",
+    "deviceSystem": "information",
+    "deviceType": "C1X",
+    "macAddress": "00:00:00:00:00:01",
+    "activationDate": "2025-08-24T10:55:26",
+    "gatewayInstallation": true,
+    "name": "",
+    "lastPingDate": "2025-08-24T00:00:00",
+    "ipAddress": "192.168.0.1",
+    "children": [
+      "7fb62aec-9c0c-4e6a-a10a-76cab7aaca31",
+      "a32d0574-143f-4f8b-b17d-cfc04e76a39b",
+      "5a6ef40f-7bb9-4138-a89b-7a489af2fe8e",
+      "7fcf91ad-b69d-4b91-b146-7b4f6b6252fc",
+      "e3cbd080-c693-44b4-9b2d-0c6acff35f23",
+      "be2121e5-2f77-448a-a8fa-8ca0b3b1e98f",
+      "f9a9a047-b72f-413c-8ed4-ecb5f5567766"
+    ],
+    "entityId": "fa60f138-b785-4dec-b7e4-53f91abf6fa9"
+  },
+  {
+    "device": "audioVideoTerminal",
+    "status": "registered",
+    "tags": [
+      {
+        "key": "PrivateAddress",
+        "value": "{\"addressType\":\"OPEN\",\"addressValues\":[{\"name\":\"address\",\"value\":\"139\"},{\"name\":\"EUaddress\",\"value\":\"20\"},{\"name\":\"mode\",\"value\":\"0\"}],\"visible\":0}"
+      }
+    ],
+    "lastSeen": "0001-01-01T00:00:00",
+    "firmwareGroup": "",
+    "connectionStateDate": "0001-01-01T00:00:00",
+    "connectionState": "UNKNOWN",
+    "id": "7fb62aec-9c0c-4e6a-a10a-76cab7aaca31",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "invitedUsers": [],
+    "metrics": [],
+    "plantId": "af5422eb-a818-441d-8d11-a419089f5a00",
+    "firmwareVersion": "N/A",
+    "hardwareVersion": "N/A",
+    "serialNumber": "b7d6ecf7-4ad3-41d7-bef0-9b77904445d4",
+    "deviceSystem": "VDES",
+    "deviceType": "IU",
+    "activationDate": "2025-08-24T11:04:39",
+    "gatewayInstallation": true,
+    "gatewayId": "fa60f138-b785-4dec-b7e4-53f91abf6fa9",
+    "internalId": "da981965-8a8e-4e1d-b511-52dfe46db4b8",
+    "name": "",
+    "entityId": "7fb62aec-9c0c-4e6a-a10a-76cab7aaca31"
+  },
+  {
+    "device": "light",
+    "status": "registered",
+    "tags": [
+      {
+        "key": "PrivateAddress",
+        "value": "{\"addressType\":\"OPEN\",\"addressValues\":[  {    \"value\" : \"139\",    \"name\" : \"address\"  }],\"visible\":0,\"buttonId\":\"2\"}"
+      }
+    ],
+    "lastSeen": "0001-01-01T00:00:00",
+    "firmwareGroup": "",
+    "connectionStateDate": "0001-01-01T00:00:00",
+    "connectionState": "UNKNOWN",
+    "id": "7fcf91ad-b69d-4b91-b146-7b4f6b6252fc",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "invitedUsers": [],
+    "metrics": [],
+    "plantId": "af5422eb-a818-441d-8d11-a419089f5a00",
+    "firmwareVersion": "N/A",
+    "hardwareVersion": "N/A",
+    "serialNumber": "fd71e418-e137-4520-9195-9e67986e0ed9",
+    "deviceSystem": "lighting",
+    "deviceType": "Staircase",
+    "activationDate": "2025-08-24T11:04:39",
+    "gatewayInstallation": true,
+    "gatewayId": "fa60f138-b785-4dec-b7e4-53f91abf6fa9",
+    "internalId": "61499b3b-a1c9-4e4e-a8ca-b0a516d0346e",
+    "name": "Staircase Lights",
+    "entityId": "7fcf91ad-b69d-4b91-b146-7b4f6b6252fc"
+  },
+  {
+    "device": "lock",
+    "status": "registered",
+    "tags": [
+      {
+        "key": "PrivateAddress",
+        "value": "{\"addressType\":\"OPEN\",\"addressValues\":[  {    \"name\" : \"address\",    \"value\" : \"20\"  }],\"visible\":2,\"buttonId\":\"1\"}"
+      }
+    ],
+    "lastSeen": "0001-01-01T00:00:00",
+    "firmwareGroup": "",
+    "connectionStateDate": "0001-01-01T00:00:00",
+    "connectionState": "UNKNOWN",
+    "id": "5a6ef40f-7bb9-4138-a89b-7a489af2fe8e",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "invitedUsers": [],
+    "metrics": [],
+    "plantId": "af5422eb-a818-441d-8d11-a419089f5a00",
+    "firmwareVersion": "N/A",
+    "hardwareVersion": "N/A",
+    "serialNumber": "0881bda3-d293-4953-b3a3-af79e1a634b4",
+    "deviceSystem": "automation",
+    "deviceType": "Lock",
+    "activationDate": "2025-08-24T11:04:39",
+    "gatewayInstallation": true,
+    "gatewayId": "fa60f138-b785-4dec-b7e4-53f91abf6fa9",
+    "internalId": "ec6b17cd-e05e-408b-b13a-f39d6cf593dd",
+    "name": "A-Door",
+    "entityId": "5a6ef40f-7bb9-4138-a89b-7a489af2fe8e"
+  },
+  {
+    "device": "lock",
+    "status": "registered",
+    "tags": [
+      {
+        "key": "PrivateAddress",
+        "value": "{\"addressType\":\"OPEN\",\"addressValues\":[  {    \"name\" : \"address\",    \"value\" : \"21\"  }],\"visible\":1,\"buttonId\":\"5\"}"
+      }
+    ],
+    "lastSeen": "0001-01-01T00:00:00",
+    "firmwareGroup": "",
+    "connectionStateDate": "0001-01-01T00:00:00",
+    "connectionState": "UNKNOWN",
+    "id": "be2121e5-2f77-448a-a8fa-8ca0b3b1e98f",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "invitedUsers": [],
+    "metrics": [],
+    "plantId": "af5422eb-a818-441d-8d11-a419089f5a00",
+    "firmwareVersion": "N/A",
+    "hardwareVersion": "N/A",
+    "serialNumber": "a97cbc6a-4065-4eff-81e7-65934c256a8f",
+    "deviceSystem": "automation",
+    "deviceType": "Lock",
+    "activationDate": "2025-08-24T11:04:39",
+    "gatewayInstallation": true,
+    "gatewayId": "fa60f138-b785-4dec-b7e4-53f91abf6fa9",
+    "internalId": "034f60ed-aa48-4552-a3fc-f7036f651fdc",
+    "name": "Gate",
+    "entityId": "be2121e5-2f77-448a-a8fa-8ca0b3b1e98f"
+  },
+  {
+    "device": "lock",
+    "status": "registered",
+    "tags": [
+      {
+        "key": "PrivateAddress",
+        "value": "{\"addressType\":\"OPEN\",\"addressValues\":[  {    \"value\" : \"22\",    \"name\" : \"address\"  }],\"visible\":1,\"buttonId\":\"6\"}"
+      }
+    ],
+    "lastSeen": "0001-01-01T00:00:00",
+    "firmwareGroup": "",
+    "connectionStateDate": "0001-01-01T00:00:00",
+    "connectionState": "UNKNOWN",
+    "id": "f9a9a047-b72f-413c-8ed4-ecb5f5567766",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "invitedUsers": [],
+    "metrics": [],
+    "plantId": "af5422eb-a818-441d-8d11-a419089f5a00",
+    "firmwareVersion": "N/A",
+    "hardwareVersion": "N/A",
+    "serialNumber": "e8c05f4e-a1f5-4796-a298-aa1d3f4c0a0d",
+    "deviceSystem": "automation",
+    "deviceType": "Lock",
+    "activationDate": "2025-08-24T11:04:39",
+    "gatewayInstallation": true,
+    "gatewayId": "fa60f138-b785-4dec-b7e4-53f91abf6fa9",
+    "internalId": "abe60129-2036-4577-b331-b31f88f2af61",
+    "name": "B-Door",
+    "entityId": "f9a9a047-b72f-413c-8ed4-ecb5f5567766"
+  },
+  {
+    "device": "audioVideoTerminal",
+    "status": "registered",
+    "tags": [
+      {
+        "key": "PrivateAddress",
+        "value": "{\"addressType\":\"OPEN\",\"addressValues\":[  {    \"name\" : \"address\",    \"value\" : \"20\"  }],\"visible\":2,\"buttonId\":\"0\"}"
+      }
+    ],
+    "lastSeen": "0001-01-01T00:00:00",
+    "firmwareGroup": "",
+    "connectionStateDate": "0001-01-01T00:00:00",
+    "connectionState": "UNKNOWN",
+    "id": "a32d0574-143f-4f8b-b17d-cfc04e76a39b",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "invitedUsers": [],
+    "metrics": [],
+    "plantId": "af5422eb-a818-441d-8d11-a419089f5a00",
+    "firmwareVersion": "N/A",
+    "hardwareVersion": "N/A",
+    "serialNumber": "ea162bf2-3d77-4dca-a282-833065b1357b",
+    "deviceSystem": "VDES",
+    "deviceType": "EU",
+    "activationDate": "2025-08-24T11:04:39",
+    "gatewayInstallation": true,
+    "gatewayId": "fa60f138-b785-4dec-b7e4-53f91abf6fa9",
+    "internalId": "90d15e46-9453-4999-ba65-dacc5afd1f34",
+    "name": "A-Door",
+    "entityId": "a32d0574-143f-4f8b-b17d-cfc04e76a39b"
+  },
+  {
+    "device": "audioVideoTerminal",
+    "status": "registered",
+    "tags": [
+      {
+        "key": "PrivateAddress",
+        "value": "{\"addressType\":\"OPEN\",\"addressValues\":[  {    \"value\" : \"21\",    \"name\" : \"address\"  }],\"visible\":1,\"buttonId\":\"4\"}"
+      }
+    ],
+    "lastSeen": "0001-01-01T00:00:00",
+    "firmwareGroup": "",
+    "connectionStateDate": "0001-01-01T00:00:00",
+    "connectionState": "UNKNOWN",
+    "id": "e3cbd080-c693-44b4-9b2d-0c6acff35f23",
+    "ownerId": "aaaaaaaa-0000-0000-0000-000000000001",
+    "allowedUsers": [
+      {
+        "id": "bbbbbbbb-0000-0000-0000-000000000001",
+        "email": "other@example.com"
+      }
+    ],
+    "invitedUsers": [],
+    "metrics": [],
+    "plantId": "af5422eb-a818-441d-8d11-a419089f5a00",
+    "firmwareVersion": "N/A",
+    "hardwareVersion": "N/A",
+    "serialNumber": "6df71847-a561-40f1-abfc-08ee2f170fb4",
+    "deviceSystem": "VDES",
+    "deviceType": "EU",
+    "activationDate": "2025-08-24T11:04:39",
+    "gatewayInstallation": true,
+    "gatewayId": "fa60f138-b785-4dec-b7e4-53f91abf6fa9",
+    "internalId": "43104032-4569-417f-8058-44af161f72d9",
+    "name": "Gate",
+    "entityId": "e3cbd080-c693-44b4-9b2d-0c6acff35f23"
+  }
+]

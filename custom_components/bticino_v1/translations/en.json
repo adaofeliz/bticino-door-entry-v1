@@ -1,0 +1,56 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "BTicino Door Entry v1",
+        "description": "Sign in with your Legrand Eliot account (the same credentials you use with the 'Door Entry CLASSE100X' app).",
+        "data": {
+          "username": "Email",
+          "password": "Password"
+        }
+      },
+      "select_home": {
+        "title": "Select home",
+        "description": "Your account has multiple homes. Pick the one you want to expose to Home Assistant.",
+        "data": {
+          "home_id": "Home"
+        }
+      },
+      "init_options": {
+        "title": "Options",
+        "description": "Configure how the staircase light is exposed.",
+        "data": {
+          "light_as_lock": "Expose staircase light as a lock entity"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "Your credentials are no longer valid. Enter your current Legrand Eliot password to continue.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid email or password.",
+      "cannot_connect": "Failed to connect to the Legrand Eliot cloud.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This account is already configured.",
+      "no_plants_found": "No homes were found for this account.",
+      "reauth_successful": "Re-authentication was successful."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "description": "Configure how the staircase light is exposed.",
+        "data": {
+          "light_as_lock": "Expose staircase light as a lock entity"
+        }
+      }
+    }
+  }
+}

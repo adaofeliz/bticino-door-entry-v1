@@ -1,0 +1,7 @@
+{
+  "access_token": "eyJhbGciOiJSUzI1NiJ9.FIXTURE_ACCESS_TOKEN.FIXTURE_SIGNATURE",
+  "refresh_token": "FIXTURE_REFRESH_TOKEN_VALUE",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "id_token": "eyJhbGciOiJSUzI1NiJ9.FIXTURE_ID_TOKEN.FIXTURE_SIGNATURE"
+}

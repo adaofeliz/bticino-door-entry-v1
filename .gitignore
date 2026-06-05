@@ -1,0 +1,15 @@
+apk/
+*.xapk
+*.apk
+.env
+__pycache__/
+*.pyc
+*.pyo
+.sisyphus/evidence/
+.DS_Store
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
+.pytest_cache/

@@ -1,0 +1,7 @@
+rules:
+  config-flow: done
+  test-coverage: done
+  unique-config-entry-identifiers: done
+  diagnostics: done
+  docs-installation: done
+  docs-configuration-parameters: done
