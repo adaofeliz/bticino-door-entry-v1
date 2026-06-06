@@ -9,5 +9,5 @@
   "issue_tracker": "https://github.com/adaofeliz/bticino-door-entry-v1/issues",
   "loggers": ["custom_components.bticino_v1"],
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
