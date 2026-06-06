@@ -5,7 +5,7 @@ apk/
 __pycache__/
 *.pyc
 *.pyo
-.sisyphus/evidence/
+.sisyphus/
 .DS_Store
 *.egg-info/
 dist/
@@ -13,3 +13,4 @@ build/
 .coverage
 htmlcov/
 .pytest_cache/
+poc/
