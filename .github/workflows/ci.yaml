@@ -23,9 +23,11 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           args: "check"
+          src: "custom_components"
       - uses: astral-sh/ruff-action@v3
         with:
           args: "format --check"
+          src: "custom_components"
 
   # ---------- Security ----------
   security:
